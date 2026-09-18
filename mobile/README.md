@@ -65,6 +65,8 @@ The generator reads `../lotto_results_all_games_oldest_to_latest_8_columns.csv` 
 
 ## Advertising configuration
 
+Ads are disabled unless `EXPO_PUBLIC_ADS_ENABLED=true` is explicitly set for the build environment. Keep it `false` for the ad-free closed test. Enabling ads also restores the in-app Remove Ads purchase entry.
+
 Development and unconfigured builds use Google's safe sample App IDs and test ad units. Before a public release, replace `androidAppId` and `iosAppId` in `app.json` with the App IDs from your AdMob account and configure the applicable unit IDs:
 
 ```text

@@ -3,6 +3,7 @@ import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import { Alert, Pressable, Share, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { SettingsPage } from '@/components/settings-page';
+import { ADS_ENABLED_FOR_BUILD } from '@/config/ads';
 import { useGuardedNavigation } from '@/lib/use-guarded-navigation';
 import { useResultReminders } from '@/providers/notifications-context';
 import {
@@ -213,20 +214,22 @@ export default function SettingsScreen() {
           subtitle={`${enabledGames.length} of 9 games shown in Results`}
           onPress={() => navigate('/my-games')}
         />
-        <SettingsRow
-          icon="remove-circle-outline"
-          title="Remove ads"
-          subtitle={
-            adsRemoved
-              ? 'Ad-free purchase active'
-              : !purchasesReady
-                ? 'Checking Google Play…'
-                : purchaseStatus === 'pending'
-                  ? 'Payment confirmation pending'
-                  : `One-time purchase${storePrice ? ` · ${storePrice}` : ' · ₱49'}`
-          }
-          onPress={() => navigate({ pathname: '/settings-detail', params: { section: 'remove-ads' } })}
-        />
+        {ADS_ENABLED_FOR_BUILD ? (
+          <SettingsRow
+            icon="remove-circle-outline"
+            title="Remove ads"
+            subtitle={
+              adsRemoved
+                ? 'Ad-free purchase active'
+                : !purchasesReady
+                  ? 'Checking Google Play…'
+                  : purchaseStatus === 'pending'
+                    ? 'Payment confirmation pending'
+                    : `One-time purchase${storePrice ? ` · ${storePrice}` : ' · ₱49'}`
+            }
+            onPress={() => navigate({ pathname: '/settings-detail', params: { section: 'remove-ads' } })}
+          />
+        ) : null}
         <SettingsRow
           icon="star-outline"
           title="Rate this app"

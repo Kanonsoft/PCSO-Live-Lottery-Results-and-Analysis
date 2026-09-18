@@ -5,6 +5,7 @@ import { Linking, StyleSheet, Text, View } from 'react-native';
 
 import { ActionButton } from '@/components/action-button';
 import { SettingsPage } from '@/components/settings-page';
+import { ADS_ENABLED_FOR_BUILD } from '@/config/ads';
 import { useAds } from '@/providers/ads-context';
 import {
   useAppTheme,
@@ -15,7 +16,7 @@ import { radius, spacing } from '@/theme/tokens';
 
 type DetailSection = 'disclaimer' | 'remove-ads' | 'privacy' | 'about';
 const PRIVACY_POLICY_URL =
-  'https://kaaanooon.github.io/PCSO-Live-Lottery-Results-and-Analysis/privacy/';
+  'https://kanonsoft.github.io/PCSO-Live-Lottery-Results-and-Analysis/privacy/';
 
 const TITLES: Readonly<Record<DetailSection, string>> = {
   disclaimer: 'Disclaimer',
@@ -266,7 +267,11 @@ function AboutContent() {
 export default function SettingsDetailScreen() {
   const params = useLocalSearchParams<{ section?: string | string[] }>();
   const rawSection = Array.isArray(params.section) ? params.section[0] : params.section;
-  const section: DetailSection = isDetailSection(rawSection) ? rawSection : 'about';
+  const requestedSection: DetailSection = isDetailSection(rawSection) ? rawSection : 'about';
+  const section: DetailSection =
+    requestedSection === 'remove-ads' && !ADS_ENABLED_FOR_BUILD
+      ? 'about'
+      : requestedSection;
 
   return (
     <SettingsPage

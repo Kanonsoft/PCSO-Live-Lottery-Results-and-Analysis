@@ -17,6 +17,7 @@ import {
 } from 'react';
 import { AppState, Platform } from 'react-native';
 
+import { ADS_ENABLED_FOR_BUILD } from '@/config/ads';
 import {
   PurchasesContext,
   REMOVE_ADS_PRODUCT_ID,
@@ -318,7 +319,13 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
   }, [connected, syncEntitlement]);
 
   const purchaseRemoveAds = useCallback(async () => {
-    if (adsRemoved || purchaseInFlightRef.current) return;
+    if (
+      !ADS_ENABLED_FOR_BUILD ||
+      adsRemoved ||
+      purchaseInFlightRef.current
+    ) {
+      return;
+    }
     purchaseInFlightRef.current = true;
     setPurchasing(true);
     setStatus('purchasing');
@@ -370,6 +377,7 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
         adsRemoved,
         storePrice: removeAdsProduct?.displayPrice ?? null,
         canPurchase:
+          ADS_ENABLED_FOR_BUILD &&
           ready &&
           connected &&
           productChecked &&

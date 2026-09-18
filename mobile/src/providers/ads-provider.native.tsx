@@ -13,6 +13,7 @@ import mobileAds, {
   type AdsConsentInfo,
 } from 'react-native-google-mobile-ads';
 
+import { ADS_ENABLED_FOR_BUILD } from '@/config/ads';
 import { AdsContext, type AdsContextValue } from '@/providers/ads-context';
 import { usePurchases } from '@/providers/purchases-context';
 
@@ -49,6 +50,7 @@ export function AdsProvider({ children }: PropsWithChildren) {
     netInfo.isConnected === true && netInfo.isInternetReachable !== false;
 
   useEffect(() => {
+    if (!ADS_ENABLED_FOR_BUILD) return;
     if (!purchasesReady) return;
     if (adsRemoved) return;
     if (!isOnline) return;
@@ -119,6 +121,7 @@ export function AdsProvider({ children }: PropsWithChildren) {
   }, [adsRemoved, isOnline, purchasesReady]);
 
   const showPrivacyOptions = useCallback(async (): Promise<boolean> => {
+    if (!ADS_ENABLED_FOR_BUILD) return false;
     try {
       const consentInfo = await AdsConsent.showPrivacyOptionsForm();
       setState((current) => ({
@@ -134,15 +137,23 @@ export function AdsProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<AdsContextValue>(
     () => ({
-      ready: purchasesReady && (adsRemoved || state.ready),
-      canRequestAds: isOnline && !adsRemoved && state.canRequestAds,
+      ready:
+        !ADS_ENABLED_FOR_BUILD ||
+        (purchasesReady && (adsRemoved || state.ready)),
+      canRequestAds:
+        ADS_ENABLED_FOR_BUILD &&
+        isOnline &&
+        !adsRemoved &&
+        state.canRequestAds,
       adsEnabled:
+        ADS_ENABLED_FOR_BUILD &&
         isOnline &&
         purchasesReady &&
         state.ready &&
         state.canRequestAds &&
         !adsRemoved,
-      privacyOptionsRequired: state.privacyOptionsRequired,
+      privacyOptionsRequired:
+        ADS_ENABLED_FOR_BUILD && state.privacyOptionsRequired,
       showPrivacyOptions,
     }),
     [

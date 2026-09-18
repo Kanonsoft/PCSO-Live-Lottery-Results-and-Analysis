@@ -1,6 +1,7 @@
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useMemo, type PropsWithChildren } from 'react';
 
+import { ADS_ENABLED_FOR_BUILD } from '@/config/ads';
 import { AdsContext, type AdsContextValue } from '@/providers/ads-context';
 import { usePurchases } from '@/providers/purchases-context';
 
@@ -15,9 +16,10 @@ export function AdsProvider({ children }: PropsWithChildren) {
     netInfo.isConnected === true && netInfo.isInternetReachable !== false;
   const value = useMemo<AdsContextValue>(
     () => ({
-      ready: purchasesReady,
-      canRequestAds: isOnline && !adsRemoved,
-      adsEnabled: isOnline && purchasesReady && !adsRemoved,
+      ready: !ADS_ENABLED_FOR_BUILD || purchasesReady,
+      canRequestAds: ADS_ENABLED_FOR_BUILD && isOnline && !adsRemoved,
+      adsEnabled:
+        ADS_ENABLED_FOR_BUILD && isOnline && purchasesReady && !adsRemoved,
       privacyOptionsRequired: false,
       showPrivacyOptions: async () => false,
     }),
