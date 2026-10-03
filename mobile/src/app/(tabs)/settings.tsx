@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, type ComponentProps, type ReactNode } from 'react';
-import { Alert, Pressable, Share, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, Share, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { SettingsPage } from '@/components/settings-page';
 import { ADS_ENABLED_FOR_BUILD } from '@/config/ads';
@@ -15,6 +15,11 @@ import { usePurchases } from '@/providers/purchases-context';
 import { radius, spacing } from '@/theme/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
+
+const PLAY_STORE_URL =
+  'https://play.google.com/store/apps/details?id=com.kanonsoft.lottoresultsandanalysisph';
+const PLAY_STORE_APP_URL =
+  'market://details?id=com.kanonsoft.lottoresultsandanalysisph';
 
 function SettingsRow({
   icon,
@@ -118,11 +123,18 @@ export default function SettingsScreen() {
             ? 'Could not update reminders'
             : 'Off';
 
-  const showRatingUnavailable = () => {
-    Alert.alert(
-      'Rating is not available yet',
-      'PCSO Lotto Results & Analysis does not have an App Store or Google Play listing yet. Rating can be enabled after the app is published.',
-    );
+  const rateApp = async () => {
+    try {
+      await Linking.openURL(
+        Platform.OS === 'android' ? PLAY_STORE_APP_URL : PLAY_STORE_URL,
+      );
+    } catch {
+      try {
+        await Linking.openURL(PLAY_STORE_URL);
+      } catch {
+        Alert.alert('Unable to open Google Play', 'Please try again later.');
+      }
+    }
   };
 
   const shareApp = async () => {
@@ -130,7 +142,8 @@ export default function SettingsScreen() {
       await Share.share({
         title: 'PCSO Lotto Results & Analysis',
         message:
-          'PCSO Lotto Results & Analysis helps you browse Philippine lottery results, save and check picks, and explore draw-history statistics. For ages 18+; play responsibly.',
+          `PCSO Lotto Results & Analysis helps you browse Philippine lottery results, save and check picks, and explore draw-history statistics. Download it on Google Play: ${PLAY_STORE_URL}`,
+        url: PLAY_STORE_URL,
       });
     } catch {
       Alert.alert('Unable to share', 'The device share sheet could not be opened.');
@@ -233,8 +246,8 @@ export default function SettingsScreen() {
         <SettingsRow
           icon="star-outline"
           title="Rate this app"
-          subtitle="Available after an app-store release"
-          onPress={showRatingUnavailable}
+          subtitle="Rate us on Google Play"
+          onPress={() => void rateApp()}
         />
         <SettingsRow
           icon="share-social-outline"

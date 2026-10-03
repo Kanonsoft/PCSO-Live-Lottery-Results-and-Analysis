@@ -2,8 +2,7 @@
   "expo": {
     "name": "PCSO Lotto Results & Analysis",
     "slug": "pcso-live-lotto-results-analysis",
-    "version": "0.1.5",
-    "orientation": "portrait",
+    "version": "0.1.6",
     "icon": "./assets/images/lotto-live-app-icon.png",
     "scheme": "pcsolivelotto",
     "userInterfaceStyle": "light",
@@ -13,7 +12,7 @@
     },
     "android": {
       "package": "com.kanonsoft.lottoresultsandanalysisph",
-      "versionCode": 10,
+      "versionCode": 11,
       "adaptiveIcon": {
         "backgroundColor": "#002856",
         "foregroundImage": "./assets/images/lotto-live-logo-transparent.png"
