@@ -196,7 +196,7 @@ function PrivacyContent() {
       </InfoCard>
       <InfoCard title="Result reminders">
         <Paragraph>
-          If enabled, the app asks for notification permission and schedules local reminders on your device at 3 PM, 5 PM, and 9 PM each day. These reminders do not use a push token or a developer-operated notification server. Your device controls permission and delivery timing.
+          If enabled, the app asks for notification permission and schedules local reminders on your device at 2 PM, 5 PM, and 9 PM each day. These reminders do not use a push token or a developer-operated notification server. Your device controls permission and delivery timing.
         </Paragraph>
       </InfoCard>
       <InfoCard title="Network requests">

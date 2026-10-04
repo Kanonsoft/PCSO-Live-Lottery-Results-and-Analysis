@@ -49,9 +49,13 @@ function NativeBanner({ style, unitId }: NativeBannerProps) {
   const { adsEnabled } = useAds();
   const { colors } = useAppTheme();
   const [canMount, setCanMount] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!adsEnabled) return;
+    if (!adsEnabled) {
+      setLoaded(false);
+      return;
+    }
 
     let active = true;
     const task = InteractionManager.runAfterInteractions(() => {
@@ -67,16 +71,26 @@ function NativeBanner({ style, unitId }: NativeBannerProps) {
 
   return (
     <View
-      accessibilityLabel="Advertisement"
+      accessibilityElementsHidden={!loaded}
+      accessibilityLabel={loaded ? 'Advertisement' : undefined}
       style={[
-        styles.container,
-        { backgroundColor: colors.surface, borderColor: colors.border },
-        style,
+        styles.mountHost,
+        loaded && styles.container,
+        loaded && { backgroundColor: colors.surface, borderColor: colors.border },
+        loaded && style,
       ]}>
-      <Text style={[styles.label, { color: colors.textMuted }]}>ADVERTISEMENT</Text>
+      {loaded ? (
+        <Text style={[styles.label, { color: colors.textMuted }]}>ADVERTISEMENT</Text>
+      ) : null}
       <BannerAd
         unitId={unitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        onAdLoaded={() => {
+          setLoaded(true);
+        }}
+        onAdFailedToLoad={() => {
+          setLoaded(false);
+        }}
       />
     </View>
   );
@@ -91,6 +105,11 @@ export function BottomBannerAd(props: BannerAdProps) {
 }
 
 const styles = StyleSheet.create({
+  mountHost: {
+    alignSelf: 'stretch',
+    height: 0,
+    overflow: 'hidden',
+  },
   container: {
     alignItems: 'center',
     alignSelf: 'stretch',
@@ -99,6 +118,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     paddingTop: 3,
+    height: 'auto',
   },
   label: {
     fontSize: 8,

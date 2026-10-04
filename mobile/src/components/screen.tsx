@@ -89,16 +89,7 @@ export function Screen({
         showsVerticalScrollIndicator={false}>
         {children}
       </ScrollView>
-      {showBottomAd ? (
-        <View
-          accessibilityRole="summary"
-          style={[
-            styles.bottomAdSlot,
-            { backgroundColor: colors.surface, borderTopColor: colors.border },
-          ]}>
-          {bottomAd}
-        </View>
-      ) : null}
+      {showBottomAd ? bottomAd : null}
     </SafeAreaView>
   );
 }
@@ -142,12 +133,5 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: spacing.xxl + 20,
     gap: spacing.md,
-  },
-  bottomAdSlot: {
-    minHeight: 58,
-    flexShrink: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
 });

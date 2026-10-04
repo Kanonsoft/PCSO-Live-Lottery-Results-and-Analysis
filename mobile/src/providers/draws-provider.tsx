@@ -12,7 +12,7 @@ import {
 import { AppState } from "react-native";
 
 import {
-  getBundledSnapshot,
+  getStartupSnapshot,
   loadDraws,
   refreshDraws,
   type DrawSource,
@@ -40,7 +40,7 @@ const SCHEDULE_POLL_MS = 15_000;
 const DRAW_HOURS = new Set([14, 17, 21]);
 const PUBLICATION_RETRY_MINUTES = new Set([0, 5, 10, 15]);
 const INITIAL_SYNC_KEY = '@pcso-live-lotto/initial-sync/v1';
-const immediateSnapshot = getBundledSnapshot();
+const immediateSnapshot = getStartupSnapshot();
 
 /** Return a stable key only during a scheduled Manila publication retry minute. */
 function manilaPublicationBucket(now = new Date()): string | null {
@@ -121,6 +121,10 @@ export function DrawsProvider({ children }: { readonly children: ReactNode }) {
     if (!initialized.current) {
       initialized.current = true;
       void (async () => {
+        // Give the first results screen a chance to paint before processing
+        // the full offline archive and initializing network synchronization.
+        await new Promise<void>((resolve) => setTimeout(resolve, 100));
+        if (!mounted.current) return;
         let firstLaunch = true;
         try {
           applySnapshot(await loadDraws());

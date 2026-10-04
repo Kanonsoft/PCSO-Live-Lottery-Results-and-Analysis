@@ -116,7 +116,7 @@ export default function SettingsScreen() {
     : reminderStatus === 'loading'
       ? 'Updating reminder schedule...'
       : reminderStatus === 'scheduled'
-        ? 'Daily at 3 PM, 5 PM, and 9 PM'
+        ? 'Daily at 2 PM, 5 PM, and 9 PM'
         : reminderStatus === 'denied'
           ? 'Notification permission is off'
           : reminderStatus === 'error'
@@ -198,7 +198,7 @@ export default function SettingsScreen() {
           </View>
           <Switch
             accessibilityLabel="Daily result reminders"
-            accessibilityHint="Notifies you daily at 3 PM, 5 PM, and 9 PM"
+            accessibilityHint="Notifies you daily at 2 PM, 5 PM, and 9 PM"
             accessibilityState={{
               disabled: !remindersAvailable || !remindersReady,
               checked: remindersEnabled,

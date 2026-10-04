@@ -70,7 +70,7 @@ function FindingButton({
 export default function AnalysisScreen() {
   const { draws } = useDraws();
   const { colors } = useAppTheme();
-  const { adsEnabled, runBeforeAnalysis } = useAnalysisInterstitial();
+  const { runBeforeAnalysis } = useAnalysisInterstitial();
   const { navigate } = useGuardedNavigation();
   const [gameCode, setGameCode] = useState<LogicalGameCode>('UL58');
   const [slot, setSlot] = useState<AnalysisSlot>('ALL');
@@ -177,9 +177,6 @@ export default function AnalysisScreen() {
           loading={isAnalyzing}
           onPress={analyze}
         />
-        {adsEnabled ? (
-          <Text style={[styles.adNotice, { color: colors.textMuted }]}>An ad may appear every second analysis.</Text>
-        ) : null}
       </SectionCard>
 
       {hasAnalyzed ? (
@@ -213,7 +210,6 @@ export default function AnalysisScreen() {
 const styles = StyleSheet.create({
   controlGroup: { gap: spacing.sm },
   controlLabel: { fontSize: 12, fontWeight: '900' },
-  adNotice: { fontSize: 10, lineHeight: 14, textAlign: 'center' },
   findings: { gap: spacing.sm },
   scope: { paddingHorizontal: spacing.xs, paddingBottom: spacing.xs },
   scopeTitle: { fontSize: 17, lineHeight: 22, fontWeight: '900' },

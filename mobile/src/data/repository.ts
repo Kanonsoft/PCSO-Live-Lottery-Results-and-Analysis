@@ -346,6 +346,28 @@ export function getBundledSnapshot(): DrawRepositorySnapshot {
   };
 }
 
+/** Keep first-render work small; loadDraws hydrates the complete archive later. */
+export function getStartupSnapshot(): DrawRepositorySnapshot {
+  const counts = new Map<string, number>();
+  const recent: Draw[] = [];
+  for (let index = bundledArchive.draws.length - 1; index >= 0; index -= 1) {
+    const tuple = bundledArchive.draws[index];
+    const code = tuple[1];
+    const count = counts.get(code) ?? 0;
+    if (count >= 20) continue;
+    const draw = normalizeBundledTuple(tuple);
+    if (!draw) continue;
+    counts.set(code, count + 1);
+    recent.push(draw);
+  }
+  return {
+    draws: recent.reverse(),
+    lastUpdated: bundledArchive.availableTo,
+    source: 'bundled',
+    error: null,
+  };
+}
+
 async function readRemoteCache(): Promise<CachedRows> {
   try {
     const serialized = await AsyncStorage.getItem(REMOTE_CACHE_KEY);

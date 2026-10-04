@@ -20,9 +20,9 @@ import { usePreferences } from '@/providers/preferences-provider';
 
 const CHANNEL_ID = 'lotto-result-reminders';
 const REMINDER_KIND = 'lotto-result-reminder';
-const REMINDER_VERSION = 1;
+const REMINDER_VERSION = 2;
 const REMINDER_TIMES = Object.freeze([
-  { hour: 15, minute: 0, label: '3:00 PM' },
+  { hour: 14, minute: 0, label: '2:00 PM' },
   { hour: 17, minute: 0, label: '5:00 PM' },
   { hour: 21, minute: 0, label: '9:00 PM' },
 ]);
