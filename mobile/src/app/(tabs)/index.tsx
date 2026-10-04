@@ -149,7 +149,7 @@ function GameResultCard({
 }
 
 export default function ResultsScreen() {
-  const { draws, source, error } = useDraws();
+  const { draws, drawsByDate, source, error } = useDraws();
   const { enabledGames } = usePreferences();
   const { colors } = useAppTheme();
   const { navigate } = useGuardedNavigation();
@@ -165,12 +165,11 @@ export default function ResultsScreen() {
   const selectedDraws = useMemo(() => {
     const grouped = new Map<LogicalGameCode, LotteryDraw[]>();
     RESULT_GAME_CODES.forEach((code) => grouped.set(code, []));
-    draws
-      .filter((draw) => draw.date === selectedDate)
+    [...(drawsByDate.get(selectedDate) ?? [])]
       .sort((left, right) => left.time.localeCompare(right.time))
       .forEach((draw) => grouped.get(draw.logicalGameCode)?.push(draw));
     return grouped;
-  }, [draws, selectedDate]);
+  }, [drawsByDate, selectedDate]);
 
   return (
     <Screen scrollToTopOnFocus title="Results">

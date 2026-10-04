@@ -47,16 +47,16 @@ const BOTTOM_BANNER_UNIT_ID = productionOrTestId(
 
 function NativeBanner({ style, unitId }: NativeBannerProps) {
   const { adsEnabled } = useAds();
+  if (!adsEnabled) return null;
+  return <MountedNativeBanner style={style} unitId={unitId} />;
+}
+
+function MountedNativeBanner({ style, unitId }: NativeBannerProps) {
   const { colors } = useAppTheme();
   const [canMount, setCanMount] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!adsEnabled) {
-      setLoaded(false);
-      return;
-    }
-
     let active = true;
     const task = InteractionManager.runAfterInteractions(() => {
       if (active) setCanMount(true);
@@ -65,9 +65,9 @@ function NativeBanner({ style, unitId }: NativeBannerProps) {
       active = false;
       task.cancel();
     };
-  }, [adsEnabled]);
+  }, []);
 
-  if (!adsEnabled || !canMount) return null;
+  if (!canMount) return null;
 
   return (
     <View

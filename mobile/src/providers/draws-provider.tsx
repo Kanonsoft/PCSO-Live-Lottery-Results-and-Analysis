@@ -17,10 +17,15 @@ import {
   refreshDraws,
   type DrawSource,
 } from "@/data/repository";
-import type { Draw } from "@/domain/types";
+import { GAME_CODES } from '@/domain/games';
+import type { Draw, LogicalGameCode } from '@/domain/types';
 
 export interface DrawsContextValue {
   readonly draws: readonly Draw[];
+  /** Pre-indexed newest-first history so opening a game never filters/sorts the archive. */
+  readonly drawsByGame: Readonly<Record<LogicalGameCode, readonly Draw[]>>;
+  /** Pre-indexed draw days so previous/next date navigation avoids scanning the archive. */
+  readonly drawsByDate: ReadonlyMap<string, readonly Draw[]>;
   readonly refresh: () => Promise<void>;
   /** Always false because a bundled snapshot is available on the first frame. */
   readonly loading: boolean;
@@ -42,6 +47,32 @@ const DRAW_HOURS = new Set([14, 17, 21]);
 const PUBLICATION_RETRY_MINUTES = new Set([0, 5, 10, 15]);
 const INITIAL_SYNC_KEY = '@pcso-live-lotto/initial-sync/v1';
 const immediateSnapshot = getStartupSnapshot();
+
+function indexDrawsByGame(
+  draws: readonly Draw[],
+): Readonly<Record<LogicalGameCode, readonly Draw[]>> {
+  const grouped = Object.fromEntries(
+    GAME_CODES.map((gameCode) => [gameCode, [] as Draw[]]),
+  ) as Record<LogicalGameCode, Draw[]>;
+
+  // Repository snapshots are oldest-first. One reverse pass produces all nine
+  // newest-first histories without filtering and sorting again on navigation.
+  for (let index = draws.length - 1; index >= 0; index -= 1) {
+    const draw = draws[index];
+    if (draw) grouped[draw.logicalGameCode].push(draw);
+  }
+  return grouped;
+}
+
+function indexDrawsByDate(draws: readonly Draw[]): ReadonlyMap<string, readonly Draw[]> {
+  const grouped = new Map<string, Draw[]>();
+  draws.forEach((draw) => {
+    const day = grouped.get(draw.date);
+    if (day) day.push(draw);
+    else grouped.set(draw.date, [draw]);
+  });
+  return grouped;
+}
 
 /** Return a stable key only during a scheduled Manila publication retry minute. */
 function manilaPublicationBucket(now = new Date()): string | null {
@@ -217,9 +248,13 @@ export function DrawsProvider({ children }: { readonly children: ReactNode }) {
     };
   }, [cacheHydrated, refresh]);
 
+  const drawsByGame = useMemo(() => indexDrawsByGame(draws), [draws]);
+  const drawsByDate = useMemo(() => indexDrawsByDate(draws), [draws]);
   const value = useMemo<DrawsContextValue>(
     () => ({
       draws,
+      drawsByGame,
+      drawsByDate,
       refresh,
       loading,
       refreshing,
@@ -227,7 +262,7 @@ export function DrawsProvider({ children }: { readonly children: ReactNode }) {
       source,
       error,
     }),
-    [draws, error, lastUpdated, loading, refresh, refreshing, source],
+    [draws, drawsByDate, drawsByGame, error, lastUpdated, loading, refresh, refreshing, source],
   );
 
   return (

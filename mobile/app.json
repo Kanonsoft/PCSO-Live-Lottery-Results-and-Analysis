@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.kanonsoft.lottoresultsandanalysisph",
-      "versionCode": 12,
+      "versionCode": 14,
       "adaptiveIcon": {
         "backgroundColor": "#002856",
         "foregroundImage": "./assets/images/lotto-live-logo-wide-badge-transparent.png"
@@ -62,7 +62,8 @@
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "./plugins/with-android-release-optimization"
     ],
     "experiments": {
       "typedRoutes": true,

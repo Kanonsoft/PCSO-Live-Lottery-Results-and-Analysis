@@ -74,7 +74,7 @@ export default function GameHistoryScreen() {
   const rawGame = Array.isArray(params.game) ? params.game[0] : params.game;
   const gameCode = isLogicalGameCode(rawGame) ? rawGame : null;
   const rule = gameCode ? GAME_BY_CODE[gameCode] : null;
-  const { draws } = useDraws();
+  const { drawsByGame } = useDraws();
   const { colors, isDark } = useAppTheme();
   const pageStyles = useMemo(() => makeStyles(colors), [colors]);
   const [pageState, setPageState] = useState<{
@@ -83,20 +83,7 @@ export default function GameHistoryScreen() {
   }>({ gameCode, limit: PAGE_SIZE });
   const limit = pageState.gameCode === gameCode ? pageState.limit : PAGE_SIZE;
 
-  const history = useMemo(
-    () =>
-      gameCode
-        ? draws
-            .filter((draw) => draw.logicalGameCode === gameCode)
-            .sort(
-              (left, right) =>
-                right.date.localeCompare(left.date) ||
-                right.time.localeCompare(left.time) ||
-                right.gameCode.localeCompare(left.gameCode),
-            )
-        : [],
-    [draws, gameCode],
-  );
+  const history = gameCode ? drawsByGame[gameCode] : [];
   const visibleHistory = history.slice(0, limit);
   const hasMore = limit < history.length;
 
