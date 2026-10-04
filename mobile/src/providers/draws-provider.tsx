@@ -37,6 +37,7 @@ const DrawsContext = createContext<DrawsContextValue | undefined>(undefined);
 
 const MANILA_UTC_OFFSET_MS = 8 * 60 * 60 * 1_000;
 const SCHEDULE_POLL_MS = 15_000;
+const FOREGROUND_REFRESH_MIN_AWAY_MS = 60_000;
 const DRAW_HOURS = new Set([14, 17, 21]);
 const PUBLICATION_RETRY_MINUTES = new Set([0, 5, 10, 15]);
 const INITIAL_SYNC_KEY = '@pcso-live-lotto/initial-sync/v1';
@@ -172,6 +173,7 @@ export function DrawsProvider({ children }: { readonly children: ReactNode }) {
     if (!cacheHydrated) return;
 
     let appState = AppState.currentState;
+    let leftActiveAt: number | null = null;
     const refreshForPublicationWindow = () => {
       if (appState !== "active") return;
       const bucket = manilaPublicationBucket();
@@ -187,8 +189,26 @@ export function DrawsProvider({ children }: { readonly children: ReactNode }) {
     const subscription = AppState.addEventListener("change", (nextState) => {
       const returnedToForeground =
         nextState === "active" && appState !== "active";
+      if (appState === 'active' && nextState !== 'active') {
+        leftActiveAt = Date.now();
+      }
       appState = nextState;
-      if (returnedToForeground) void refresh();
+      if (!returnedToForeground) return;
+
+      // A billing/permission overlay can briefly mark the app inactive. Do not
+      // start nine network requests while the user is navigating back from it.
+      // Publication windows are still checked immediately, while an actual
+      // minute-long absence receives the normal foreground refresh.
+      const publicationBucket = manilaPublicationBucket();
+      if (publicationBucket) {
+        refreshForPublicationWindow();
+      } else if (
+        leftActiveAt !== null &&
+        Date.now() - leftActiveAt >= FOREGROUND_REFRESH_MIN_AWAY_MS
+      ) {
+        void refresh();
+      }
+      leftActiveAt = null;
     });
 
     return () => {

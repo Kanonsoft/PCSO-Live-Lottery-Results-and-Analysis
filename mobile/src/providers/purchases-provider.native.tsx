@@ -29,6 +29,7 @@ import { EntitlementReconciliation } from '@/providers/entitlement-reconciliatio
 
 const ENTITLEMENT_CACHE_KEY = '@lottolens-ph/entitlements/remove-ads/v1';
 const CONNECTION_GRACE_MS = 5_000;
+const PURCHASE_RESUME_SYNC_DELAY_MS = 10_000;
 
 function isRemoveAdsPurchase(purchase: Purchase): boolean {
   return (
@@ -66,6 +67,7 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
   const entitlementOwnedRef = useRef(false);
   const entitlementWriteRef = useRef<Promise<void>>(Promise.resolve());
   const purchaseInFlightRef = useRef(false);
+  const suppressResumeSyncUntilRef = useRef(0);
   const reconciliation = useRef(new EntitlementReconciliation()).current;
 
   const persistEntitlement = useCallback((owned: boolean): Promise<void> => {
@@ -175,6 +177,8 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
     async (purchase: Purchase) => {
       if (purchase.productId !== REMOVE_ADS_PRODUCT_ID) return;
       purchaseInFlightRef.current = false;
+      suppressResumeSyncUntilRef.current =
+        Date.now() + PURCHASE_RESUME_SYNC_DELAY_MS;
       setPurchasing(false);
 
       if (purchase.purchaseState === 'pending') {
@@ -214,6 +218,8 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
   const handlePurchaseError = useCallback(
     (error: ExpoPurchaseError) => {
       purchaseInFlightRef.current = false;
+      suppressResumeSyncUntilRef.current =
+        Date.now() + PURCHASE_RESUME_SYNC_DELAY_MS;
       setPurchasing(false);
 
       if (error.code === ErrorCode.UserCancelled) {
@@ -311,7 +317,11 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!connected) return;
     const subscription = AppState.addEventListener('change', (nextState) => {
-      if (nextState === 'active' && !purchaseInFlightRef.current) {
+      if (
+        nextState === 'active' &&
+        !purchaseInFlightRef.current &&
+        Date.now() >= suppressResumeSyncUntilRef.current
+      ) {
         void syncEntitlement(false);
       }
     });
@@ -327,6 +337,7 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
       return;
     }
     purchaseInFlightRef.current = true;
+    suppressResumeSyncUntilRef.current = Number.POSITIVE_INFINITY;
     setPurchasing(true);
     setStatus('purchasing');
     setMessage(null);
@@ -335,6 +346,8 @@ export function PurchasesProvider({ children }: PropsWithChildren) {
       const storeConnected = connected || (await reconnect());
       if (!storeConnected) {
         purchaseInFlightRef.current = false;
+        suppressResumeSyncUntilRef.current =
+          Date.now() + PURCHASE_RESUME_SYNC_DELAY_MS;
         setPurchasing(false);
         setReady(true);
         setStatus('unavailable');

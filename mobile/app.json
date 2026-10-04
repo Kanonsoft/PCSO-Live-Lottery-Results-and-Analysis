@@ -3,19 +3,19 @@
     "name": "PCSO Lotto Results & Analysis",
     "slug": "pcso-live-lotto-results-analysis",
     "version": "0.1.6",
-    "icon": "./assets/images/lotto-live-app-icon.png",
+    "icon": "./assets/images/lotto-live-app-icon-wide-badge.png",
     "scheme": "pcsolivelotto",
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.lottolens.ph",
-      "icon": "./assets/images/lotto-live-app-icon.png"
+      "icon": "./assets/images/lotto-live-app-icon-wide-badge.png"
     },
     "android": {
       "package": "com.kanonsoft.lottoresultsandanalysisph",
-      "versionCode": 11,
+      "versionCode": 12,
       "adaptiveIcon": {
         "backgroundColor": "#002856",
-        "foregroundImage": "./assets/images/lotto-live-logo-transparent.png"
+        "foregroundImage": "./assets/images/lotto-live-logo-wide-badge-transparent.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -29,7 +29,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#002856",
-          "image": "./assets/images/lotto-live-logo-transparent.png",
+          "image": "./assets/images/lotto-live-logo-wide-badge-transparent.png",
           "imageWidth": 96
         }
       ],

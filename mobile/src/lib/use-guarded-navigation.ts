@@ -7,18 +7,31 @@ import { useCallback, useRef } from 'react';
  */
 export function useGuardedNavigation() {
   const locked = useRef(false);
+  const unlockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const unlock = useCallback(() => {
+    locked.current = false;
+    if (unlockTimer.current) {
+      clearTimeout(unlockTimer.current);
+      unlockTimer.current = null;
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      locked.current = false;
-    }, []),
+      unlock();
+      return unlock;
+    }, [unlock]),
   );
 
   const navigate = useCallback((href: Href) => {
     if (locked.current) return;
     locked.current = true;
-    router.navigate(href);
-  }, []);
+    router.push(href);
+    // If a route transition is rejected or interrupted, never leave this
+    // screen permanently unable to navigate.
+    unlockTimer.current = setTimeout(unlock, 750);
+  }, [unlock]);
 
   return { navigate } as const;
 }
